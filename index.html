@@ -529,6 +529,13 @@ input:checked+.toggle-slider::before{transform:translateX(24px)}
 
     <div class="form-row">
       <div class="form-group">
+        <label class="form-label">구역</label>
+        <select class="form-input" id="f-seat-block">
+          <option value="A">A</option>
+          <option value="B">B</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">좌석 열</label>
         <select class="form-input" id="f-seat-row">
           <option value="">선택</option>
@@ -542,14 +549,6 @@ input:checked+.toggle-slider::before{transform:translateX(24px)}
           <option value="8">8</option>
           <option value="9">9</option>
           <option value="10">10</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">블록</label>
-        <select class="form-input" id="f-seat-block">
-          <option value="">-</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
         </select>
       </div>
       <div class="form-group">
@@ -991,7 +990,7 @@ async function openReceiptViewer(key) {
 
 // ===== 링크아트센터드림 드림2관 좌석 레이아웃 =====
 // groups: [시작번호, 끝번호] 쌍의 배열 (통로로 구분)
-// 예그린씨어터 1층 실제 좌석 배치 (A/B 블록, 블록별 독립 번호)
+// 예그린씨어터 1층 실제 좌석 배치 (A/B 구역, 구역별 독립 번호)
 const SEAT_LAYOUT = [
   { row: '1', a: [1,11], b: [1,10] },
   { row: '2', a: [1,11], b: [1,10] },
@@ -1251,7 +1250,7 @@ function renderNextSchedule() {
   const dow = weekdays[new Date(next.date).getDay()];
   const dateStr = `${y}.${m}.${d} (${dow})`;
 
-  const seat = next.seatRow && next.seatNum ? `${next.seatRow}열 ${next.seatBlock||''}${next.seatNum}번` : '-';
+  const seat = next.seatBlock &&next.seatRow && next.seatNum ? `${next.seatBlock||'-'}구역 ${next.seatRow}열 ${next.seatNum}번` : '-';
   const aName = next.a || '';
   const bName = next.b || '';
   const discLabel = next.discountUsed && next.discountUsed !== 'none' ? kindLabel(next.discountUsed) : null;
@@ -2113,7 +2112,7 @@ function renderScheduleItem(s, onclick) {
         ${receiptTag}
       </div>
       <div class="sched-cast">${castDisplay}</div>
-      <div class="sched-sub">💺 ${s.seatRow||'-'}열 ${s.seatBlock||''}${s.seatNum||'-'}번${s.event?' · 🎉'+s.event:''}</div>
+      <div class="sched-sub">💺 ${s.seatBlock||'-'}구역 ${s.seatRow||'-'}열 ${s.seatNum||'-'}번${s.event?' · 🎉'+s.event:''}</div>
       ${s.memo?`<div class="sched-memo">💬 ${s.memo}</div>`:''}
       ${stampInfo?`<span class="stamp-badge">📑 ${stampInfo}</span>`:''}
       ${discInfo?`<span class="stamp-badge" style="background:var(--accent);opacity:.85">🎫 ${discInfo}</span>`:''}
@@ -2150,7 +2149,7 @@ function openDetail(id) {
 
   document.getElementById('detail-content').innerHTML = `
     <div class="detail-row"><span class="detail-key">날짜/시간</span><span class="detail-val">${s.date} ${s.time||''}</span></div>
-    <div class="detail-row"><span class="detail-key">좌석</span><span class="detail-val">${s.seatRow||'-'}열 ${s.seatBlock||''}${s.seatNum||'-'}번</span></div>
+    <div class="detail-row"><span class="detail-key">좌석</span><span class="detail-val">${s.seatBlock || '-'}구역 ${s.seatRow||'-'}열 ${s.seatNum||'-'}번</span></div>
     <div class="detail-row"><span class="detail-key">A</span><span class="detail-val">${s.a||'-'}</span></div>
     <div class="detail-row"><span class="detail-key">B</span><span class="detail-val">${s.b||'-'}</span></div>
     <div class="detail-row"><span class="detail-key">이벤트</span><span class="detail-val">${s.event||'-'}</span></div>
@@ -3349,14 +3348,14 @@ function renderHeatmap() {
     html += '<div class="hm-left-block">';
     for (let i = rowDef.a[0]; i <= rowDef.a[1]; i++) {
       const cnt = countMap[`${rowDef.row}-A${i}`] || 0;
-      html += `<div class="hm-seat ${hmClass(cnt)}" data-tip="${rowDef.row}열 A${i}번: ${cnt}회">${i}</div>`;
+      html += `<div class="hm-seat ${hmClass(cnt)}" data-tip="A구역 ${rowDef.row}열 ${i}번: ${cnt}회">${i}</div>`;
     }
     html += '</div>';
     html += '<div class="hm-center-aisle"></div>';
     html += '<div class="hm-right-block">';
     for (let i = rowDef.b[0]; i <= rowDef.b[1]; i++) {
       const cnt = countMap[`${rowDef.row}-B${i}`] || 0;
-      html += `<div class="hm-seat ${hmClass(cnt)}" data-tip="${rowDef.row}열 B${i}번: ${cnt}회">${i}</div>`;
+      html += `<div class="hm-seat ${hmClass(cnt)}" data-tip="B구역 ${rowDef.row}열 ${i}번: ${cnt}회">${i}</div>`;
     }
     html += '</div>';
 
@@ -3388,7 +3387,7 @@ function applyHeatmapScale(containerId = 'stats-heatmap', outerId = 'hm-outer') 
   const BASE_LBL_MARGIN = 3; // px
   const BASE_GAP  = 2;   // px
   const BASE_AISLE = 14; // px
-  // 최대 좌석 수: A블록 11개 + B블록 10개
+  // 최대 좌석 수: A구역 11개 + B구역 10개
   const MAX_LEFT_SEATS  = 11;
   const MAX_RIGHT_SEATS = 10;
   // 자연 너비 = lbl + margin + (seat*n + gap*(n-1)) + aisle + (seat*n + gap*(n-1))
