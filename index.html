@@ -1670,7 +1670,7 @@ function getTimeOptions(dateStr, isHoliday) {
   if (!dateStr) return ['20:00'];
   const dow = new Date(dateStr).getDay(); // 0=일, 1=월 ... 4=목, 5=금, 6=토
   if (isHoliday || dow === 0) return ['14:00', '18:00'];   // 공휴일 or 일요일
-  if (dow === 4) return ['16:00', '20:00'];                 // 목요일
+  if (dow === 3) return ['16:00', '20:00'];                 // 수요일
   if (dow === 6) return ['15:00', '19:00'];                 // 토요일
   return ['20:00'];                                         // 평일(월화수금) 고정
 }
